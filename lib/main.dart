@@ -27,9 +27,32 @@ class SignupForm extends StatefulWidget {
 class SignupPageState extends State<SignupForm> {
 
   final formKey = GlobalKey<FormState>();
+  final passwordController = TextEditingController();
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    passwordController.dispose();
+  }
 
   void validateAndLogin() {
-
+    if (formKey.currentState.validate()) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return new AlertDialog(
+            content: new Text("Successful registration", style: new TextStyle(fontSize: 26.0),),
+            actions: <Widget>[
+              new FlatButton(
+                  onPressed: () { Navigator.pop(context); },
+                  child: new Text("OK")
+              )
+            ],
+          );
+        }
+      );
+    }
   }
 
   @override
@@ -51,6 +74,7 @@ class SignupPageState extends State<SignupForm> {
                       hintText: 'Enter your email address',
                       border: const OutlineInputBorder()
                   ),
+                  validator: validateEmail,
                 ),
               ),
               new Padding(
@@ -61,6 +85,9 @@ class SignupPageState extends State<SignupForm> {
                       hintText: 'Enter your password',
                       border: const OutlineInputBorder()
                   ),
+                  controller: passwordController,
+                  obscureText: true,
+                  validator: validatePassword,
                 ),
               ),
               new Padding(
@@ -71,6 +98,16 @@ class SignupPageState extends State<SignupForm> {
                       hintText: 'Repeat the password',
                       border: const OutlineInputBorder()
                   ),
+                  obscureText: true,
+                  validator: validateRepeatPassword,
+                ),
+              ),
+              new Container(
+                alignment: Alignment.centerRight,
+                padding: new EdgeInsets.all(8.0),
+                child: new RaisedButton(
+                    child: const Text("Submit"),
+                    onPressed: validateAndLogin
                 ),
               ),
             ],
@@ -78,5 +115,17 @@ class SignupPageState extends State<SignupForm> {
         ),
       ),
     );
+  }
+
+  String validateEmail(String val) {
+    return new RegExp(r'(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)').allMatches(val).isEmpty ? "Invalid Email" : null;
+  }
+
+  String validatePassword(String val) {
+    return new RegExp(r'^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$').allMatches(val).isEmpty ? "Invalid Password" : null;
+  }
+
+  String validateRepeatPassword(String val) {
+    return passwordController.text != val ? "Passwords must match" : null;
   }
 }
